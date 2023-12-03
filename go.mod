@@ -5,6 +5,7 @@ go 1.21.2
 require (
 	github.com/lestrrat-go/jwx/v2 v2.0.17
 	golang.org/x/crypto v0.16.0
+	golang.org/x/sync v0.1.0
 )
 
 require (
