@@ -2,14 +2,26 @@ package messaging
 
 import (
 	"context"
+	"errors"
 	"github.com/slack-go/slack"
 )
 
 var _ Messenger = (*Slack)(nil)
 
 type Slack struct {
-	WebhookURL *string
-	Token      *string
+	webhookURL *string
+	token      *string
+}
+
+func NewSlack(webhookURL, token *string) (*Slack, error) {
+	if webhookURL == nil && token == nil {
+		return nil, errors.New("invalid parameter")
+	}
+
+	return &Slack{
+		webhookURL: webhookURL,
+		token:      token,
+	}, nil
 }
 
 func (r *Slack) Post(m Message) error {
@@ -18,15 +30,14 @@ func (r *Slack) Post(m Message) error {
 }
 
 func (r *Slack) PostWithContext(ctx context.Context, m Message) error {
-	if r.WebhookURL != nil {
-		slack.PostWebhook(*r.WebhookURL, &slack.WebhookMessage{
+	if r.webhookURL != nil {
+		return slack.PostWebhookContext(ctx, *r.webhookURL, &slack.WebhookMessage{
 			Channel: m.Channel,
 			Text:    m.Text,
 		})
-		slack.PostMessage
-		return r.PostSlackWebhook(m)
-	} else {
-		slack.post
+	} else if r.token != nil {
+		_, _, err := slack.New(*r.token).PostMessageContext(ctx, m.Channel, slack.MsgOptionText(m.Text, false))
+		return err
 	}
-	return nil
+	return errors.New("invalid parameter")
 }
