@@ -3,6 +3,7 @@ module github.com/625tk/advent-coding
 go 1.21.2
 
 require (
+	github.com/bwmarrin/discordgo v0.27.1
 	github.com/lestrrat-go/jwx/v2 v2.0.17
 	github.com/slack-go/slack v0.12.3
 	golang.org/x/crypto v0.16.0
