@@ -39,6 +39,21 @@ func (r *Cache) Get(key string, getFunc func() (v any, err error), expire time.D
 	}
 
 	// update
+	res, dErr := r.Update(key, getFunc, expire)
+
+	if dErr != nil {
+		if errors.Is(err, ErrExpired) {
+			return val, ErrExpired
+		} else {
+			return nil, dErr
+		}
+	}
+
+	return res, nil
+}
+
+func (r *Cache) Update(key string, getFunc func() (v any, err error), expire time.Duration) (any, error) {
+	// update
 	res, dErr, _ := r.g.Do(key, func() (interface{}, error) {
 		got, err := getFunc()
 		if err != nil {
@@ -53,15 +68,7 @@ func (r *Cache) Get(key string, getFunc func() (v any, err error), expire time.D
 		return got, nil
 	})
 
-	if dErr != nil {
-		if errors.Is(err, ErrExpired) {
-			return val, ErrExpired
-		} else {
-			return nil, dErr
-		}
-	}
-
-	return res, nil
+	return res, dErr
 }
 
 func (r *Cache) get(key string, now int64) (any, error) {
